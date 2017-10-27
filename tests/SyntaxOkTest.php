@@ -57,4 +57,25 @@ class SyntaxOkTest extends PHPUnit_Framework_TestCase
         $plain_config = file_get_contents($config_path);
         static::assertEquals($expected, Tokenizer::tokenize($plain_config));
     }
+    
+    public function testZoneRootFix()
+    {
+        $expected = json_decode('[{"NAME":"typefish.co.uk.","TTL":"3600","TYPE":"A","RDATA":{"ADDRESS":"127.0.0.1"}},{"NAME":"a.typefish.co.uk.","TTL":"3600","TYPE":"A","RDATA":{"ADDRESS":"127.0.0.2"}},{"NAME":"a.typefish.co.uk.typefish.co.uk.","TTL":"3600","TYPE":"A","RDATA":{"ADDRESS":"127.0.0.3"}},{"NAME":"a.typefish.co.uk.","TTL":"3600","TYPE":"A","RDATA":{"ADDRESS":"127.0.0.4"}},{"NAME":"typefish.co.uk.","TTL":"3600","TYPE":"A","RDATA":{"ADDRESS":"127.0.0.5"}}]', true);
+        $config_path = realpath(__DIR__ . "/../zone/syntax_ok/relative.zone");
+        $plain_config = file_get_contents($config_path);
+        static::assertEquals($expected, Tokenizer::tokenize($plain_config));
+    }
+    
+    public function testRelative()
+    {
+        $expected = json_decode('[{"NAME":"@","TTL":"3600","TYPE":"A","RDATA":{"ADDRESS":"127.0.0.1"}},{"NAME":"a","TTL":"3600","TYPE":"A","RDATA":{"ADDRESS":"127.0.0.2"}},{"NAME":"a.typefish.co.uk","TTL":"3600","TYPE":"A","RDATA":{"ADDRESS":"127.0.0.3"}},{"NAME":"a","TTL":"3600","TYPE":"A","RDATA":{"ADDRESS":"127.0.0.4"}},{"NAME":"@","TTL":"3600","TYPE":"A","RDATA":{"ADDRESS":"127.0.0.5"}}]', true);
+        $config_path = realpath(__DIR__ . "/../zone/syntax_ok/relative.zone");
+        $plain_config = file_get_contents($config_path);
+        
+        $options = [
+            'relativeToOrigin' => true,
+        ];
+        
+        static::assertEquals($expected, Tokenizer::tokenize($plain_config, $options));
+    }
 }

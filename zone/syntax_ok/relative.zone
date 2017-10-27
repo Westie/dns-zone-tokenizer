@@ -1,0 +1,7 @@
+$ORIGIN typefish.co.uk.
+
+@                                   3600 IN A     127.0.0.1
+a                                   3600 IN A     127.0.0.2
+a.typefish.co.uk                    3600 IN A     127.0.0.3
+a.typefish.co.uk.                   3600 IN A     127.0.0.4
+typefish.co.uk.                     3600 IN A     127.0.0.5
