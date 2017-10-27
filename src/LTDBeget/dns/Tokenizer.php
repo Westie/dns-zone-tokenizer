@@ -43,29 +43,37 @@ final class Tokenizer
         'origin' => true,
         'ttl'    => true
     ];
-
     /**
      * @var int
      */
     private $recordsAmmount = 0;
-
+    /**
+     * @var array
+     */
+    private $options = [];
+    
     /**
      * Tokenizer constructor.
      *
      * @param string $string
      */
-    private function __construct(string $string)
+    private function __construct(string $string, array $options = [])
     {
         $this->stream = new StringStream($string);
+        $this->options = $options;
+        
+        if(!isset($options['relativeToOrigin'])) {
+            $options['relativeToOrigin'] = false;
+        }
     }
 
     /**
      * @param string $plainData
      * @return array
      */
-    public static function tokenize(string $plainData) : array
+    public static function tokenize(string $plainData, array $options = []) : array
     {
-        return (new self($plainData))->tokenizeInternal()->tokens;
+        return (new self($plainData, $options))->tokenizeInternal()->tokens;
     }
 
     /**
@@ -154,7 +162,8 @@ final class Tokenizer
         } else {
             $previousName = NULL;
         }
-        $this->tokens[] = (new Record($this->stream, $this->origin, $this->ttl, $isFirst, $previousName))->tokenize();
+        
+        $this->tokens[] = (new Record($this->stream, $this->origin, $this->ttl, $isFirst, $previousName, $this->options))->tokenize();
         $this->recordsAmmount++;
     }
 }

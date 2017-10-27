@@ -43,6 +43,10 @@ class Record
      * @var string
      */
     private $previousName;
+    /**
+     * @var array
+     */
+    private $options = [];
 
     /**
      * Record constructor.
@@ -59,7 +63,8 @@ class Record
         string $globalOrigin = NULL,
         string $globalTtl = NULL,
         bool $isFirst = false,
-        string $previousName = NULL
+        string $previousName = NULL,
+        array $options = []
     )
     {
         $this->stream       = $stream;
@@ -67,6 +72,7 @@ class Record
         $this->globalTtl    = $globalTtl;
         $this->isFirst      = $isFirst;
         $this->previousName = $previousName;
+        $this->options      = $options;
     }
 
     /**
@@ -111,12 +117,36 @@ class Record
         
         $this->stream->ignoreHorizontalSpace();
         $this->extractRData();
-
-        if($this->globalOrigin && substr($this->tokens['NAME'], -1) !== '.' && $this->tokens['NAME'] !== '@') {
-            if($this->globalOrigin === '.') {
-                $this->tokens['NAME'] .= $this->globalOrigin;
+        
+        if($this->globalOrigin) {
+            if($this->tokens['NAME'] === '@') {
+                // handle the root character
+                if(!empty($this->options['relativeToOrigin'])) {
+                    $this->tokens['NAME'] = $this->globalOrigin;
+                }
+            } elseif($this->tokens['NAME'] == $this->globalOrigin) {
+                // handle cases of origin domain
+                if(!empty($this->options['relativeToOrigin'])) {
+                    $this->tokens['NAME'] = '@';
+                }
+            }
+            elseif(substr($this->tokens['NAME'], -1) === '.') {
+                // handle cases where record is a child of global origin
+                if(!empty($this->options['relativeToOrigin'])) {
+                    $matches = [];
+                    if(preg_match('/^(.*)\.'.preg_quote($this->globalOrigin).'$/', $this->tokens['NAME'], $matches)) {
+                        $this->tokens['NAME'] = $matches[1];
+                    }
+                }
             } else {
-                $this->tokens['NAME'] .= '.'.$this->globalOrigin;
+                // the rest of cases
+                if(empty($this->options['relativeToOrigin'])) {
+                    if($this->globalOrigin === '.') {
+                        $this->tokens['NAME'] .= $this->globalOrigin;
+                    } else {
+                        $this->tokens['NAME'] .= '.'.$this->globalOrigin;
+                    }
+                }
             }
         }
         
