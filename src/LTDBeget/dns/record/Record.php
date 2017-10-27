@@ -121,7 +121,7 @@ class Record
         if($this->globalOrigin) {
             if($this->tokens['NAME'] === '@') {
                 // handle the root character
-                if(!empty($this->options['relativeToOrigin'])) {
+                if(empty($this->options['relativeToOrigin'])) {
                     $this->tokens['NAME'] = $this->globalOrigin;
                 }
             } elseif($this->tokens['NAME'] == $this->globalOrigin) {
@@ -129,8 +129,7 @@ class Record
                 if(!empty($this->options['relativeToOrigin'])) {
                     $this->tokens['NAME'] = '@';
                 }
-            }
-            elseif(substr($this->tokens['NAME'], -1) === '.') {
+            } elseif(substr($this->tokens['NAME'], -1) === '.') {
                 // handle cases where record is a child of global origin
                 if(!empty($this->options['relativeToOrigin'])) {
                     $matches = [];
